@@ -21,10 +21,11 @@ class OpenAI {
     })
     this.openai = new OpenAIApi(configuration)
   }
+  //gpt-3.5-turbo-16k
   async chatGPT(messages) {
     try {
       const response = await this.openai.createChatCompletion({
-         model: 'gpt-3.5-turbo',
+         model: 'gpt-3.5-turbo-16k',
         messages,
 
       })

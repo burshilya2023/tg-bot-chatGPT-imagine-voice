@@ -5,7 +5,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 i18n.configure({
-  locales: ['ru', 'en', 'ar', 'fr', 'pl', 'de'],
+  locales: ['ru', 'en', 'ar', 'fr', 'pl', 'de','uz'],
   directory: __dirname + '/../locales',
   defaultLocale: 'en',
   objectNotation: true,
@@ -46,7 +46,7 @@ export  async function translate(LanCode,key ) {
       const LanCode=ctx.message.from.language_code
       i18n.setLocale(LanCode || 'en');
         const result = i18n.__('INFO');
-        ctx.reply(`${result}`);
+       await ctx.reply(`${result}`);
     }
 
     

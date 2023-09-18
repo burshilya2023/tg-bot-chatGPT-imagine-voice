@@ -8,6 +8,7 @@ import moment from 'moment';
 
 
 import { translate, translateEndFreeQuestions } from "../TranslateAppi18/i18nSetup.js";
+import { cleanSpecialSymbols } from "./TextHandler.js";
 
 export const rateLimit = {};
 
@@ -67,7 +68,7 @@ export async function voiceHandler(ctx) {
       const response = await openai.chatGPT(ctx.session[userId].messages);
       const endTime = moment();
       const responseTime = endTime.diff(startTime, 'milliseconds') / 1000;
-      await ctx.reply(response.content);
+      await ctx.replyWithHTML(cleanSpecialSymbols(response.content), { parse_mode: 'MarkdownV2' })
       console.log(`${user.username=='пользователь' ? userId: user.username},-задал голосовой ${text} вопрос в ${startTime}, время ответа${responseTime}сек`);
       if (user.onOffAssistent === 'on') {
         await textConverter.textToSpeech(response.content, ctx);
@@ -80,6 +81,7 @@ export async function voiceHandler(ctx) {
       });
     } else {
       // уведомление о лимите сообщений и оплате
+     
      await translateEndFreeQuestions(ctx)
     }
   } 
