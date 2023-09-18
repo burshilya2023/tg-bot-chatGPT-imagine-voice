@@ -2,11 +2,14 @@ import fs from 'fs'
 import { UserModel } from '../default/MongoModel.js';
 import dotenv from 'dotenv';
 import { translate } from '../TranslateAppi18/i18nSetup.js';
+import cron from 'node-cron'
+
+
 dotenv.config();
-// дорогой генератор
-const engineId = 'stable-diffusion-xl-1024-v1-0';
 // дешевый генератор
 const stable_diffusion512_v15 = 'stable-diffusion-512-v2-1';
+// дорогой генератор
+const engineId = 'stable-diffusion-xl-1024-v1-0';
 const apiHost = 'https://api.stability.ai'; 
 const url = `${apiHost}/v1/user/balance`;
 const outputDirectory = './out';
@@ -28,6 +31,14 @@ if (!fs.existsSync(outputDirectory)) {
        await ctx.reply(imagine_PROMT);
         return;
       }
+      if(user.imagineGeneration>5){
+
+        const FRE_IMAGINE= await translate(LanCode,"FRE_IMAGINE")
+       await ctx.reply(FRE_IMAGINE)
+        console.log(userId,'сделал 5 картинок');
+        return
+      }
+
       ctx.telegram.sendChatAction(ctx.chat.id, "upload_photo");
       const response = await fetch(
         `${apiHost}/v1/generation/${stable_diffusion512_v15}/text-to-image`,
@@ -74,6 +85,12 @@ if (!fs.existsSync(outputDirectory)) {
       console.error('Error:', error.message);
     }
   }
+
+
+
+  
+
+  //balancse token my account
   export async function StableDiffusionBalance() {
     try {
       const response = await fetch(url, {
@@ -94,4 +111,27 @@ if (!fs.existsSync(outputDirectory)) {
     }
   }
   
+  
+
+
+  // Функция для обнуления imagineGeneration у всех пользователей
+  const resetImagineGeneration = async () => {
+    try {
+      // Найдите всех пользователей в базе данных
+      const users = await UserModel.find();
+  
+      // Обнулите imagineGeneration для каждого пользователя
+      for (const user of users) {
+        user.imagineGeneration = 0;
+        await user.save();
+      }
+  
+      console.log('Счетчики imagineGeneration обнулены для всех пользователей.');
+    } catch (error) {
+      console.error('Ошибка при обнулении счетчиков imagineGeneration:', error);
+    }
+  };
+  
+  // Запускайте функцию каждый день в определенное время (например, в полночь)
+  cron.schedule('0 0 * * *', resetImagineGeneration);
   

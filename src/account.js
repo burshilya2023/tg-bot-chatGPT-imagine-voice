@@ -17,8 +17,9 @@ export async function accountCommand(ctx) {
 
   await ctx.reply(`STATUS
      ${user.statusPay === 'succeeded' ? '✅ ' + susscribeTranslation + ' YES' : '❌ ' + susscribeTranslation + ' not payed'}
+     🖼️image ${user.imagineGeneration}/5 in day
+     ✉️ ${answerTextTranslation} ${user.dayTextAnswer}/20
     🎤 ${answerVoiceTranslation} ${user.audioAnswer}/105
-    ✉️ ${answerTextTranslation} ${user.textAnswer}/105
     🗣️ ${accentAssistentTranslation} ${user.languageAssistent}
     🎧 ${speedAudioAnswerTranslation} ${user.speakingRate}
     🔊 ${audioAnswerOnOffTranslation} ${user.onOffAssistent === 'on' ? 'ON' : 'OFF'}

@@ -4,6 +4,7 @@ import {dirname, resolve} from 'path'
 import {fileURLToPath} from 'url'
 import axios from 'axios'
 import { UserModel } from './MongoModel.js'
+import { translate } from '../TranslateAppi18/i18nSetup.js'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 class TextConverter{
    async getToken(){
@@ -124,7 +125,8 @@ class TextConverter{
           }
 
         } catch (e) {
-          ctx.reply('текст слишком длинный, что бы его перевести');
+            const TEXT_TO_SPEECH_ERROR= await translate(ctx.message.from.language_code,'TEXT_TO_SPEECH_ERROR')
+          await ctx.reply(TEXT_TO_SPEECH_ERROR);
           console.error('Error while text2Speech', e.message);
         }
       }

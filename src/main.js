@@ -11,7 +11,7 @@ import { imagineDall_E } from './imgGeneration/imagineDall_E.js'
 import { accountCommand } from './account.js'
 import { timeoutCommand } from './default/utils.js'
 import { donationCommand } from './donation.js'
-import { Telegraf,session } from 'telegraf'
+import { Markup, Telegraf,session } from 'telegraf'
 import { imagineMidjournel } from './imgGeneration/imagineMidjournel.js'
 import { buybotCommand, returnBuy } from './BuyBot.js'
 import { StableDiffusion, StableDiffusionBalance } from './imgGeneration/StableDiffusion.js'
@@ -19,9 +19,13 @@ import { onOffAssistent, setLanguage, setSpeakingRate, settingCommand } from './
 import { translate, translateCooperationCommand, translateInfoCommand } from './TranslateAppi18/i18nSetup.js'
 import { stripePay1Year, stripePay1month, stripePayCommand, stripeStatusPay } from './StripeUkassa/Stripe.js'
 import { UkassaPaymentCommand,  statusUkassa, ukassaPay1Year, ukassaPay1month } from './StripeUkassa/Ukassa.js'
+import { Brodcast } from './brodcast.js';
 dotenv.config();
 const PORT = process.env.PORT || 8080;
 mongoose.connect(process.env.MONGO_DB, { useNewUrlParser: true, useUnifiedTopology: true })
+
+
+
 
 
 
@@ -32,7 +36,34 @@ const bot = new Telegraf(process.env.TELEGRAM_TOKEN_DEV);
 bot.use(session())
 // !main command
 // узнать колво пользователей
-bot.command('getusers', async (ctx) => {
+
+
+
+
+export async function setCommand (ctx){
+  // const userId = String(ctx.message.from.id);
+  const LanCode = ctx.message.from.language_code;
+  const SET_MY_COMMAND_START=await translate(LanCode,'SET_MY_COMMAND_START')
+  const SET_MY_COMMAND_INFO=await translate(LanCode,'SET_MY_COMMAND_INFO')
+  const SET_MY_COMMAND_ACCOUNT=await translate(LanCode,'SET_MY_COMMAND_ACCOUNT')
+  const SET_MY_COMMAND_SETTINGS=await translate(LanCode,'SET_MY_COMMAND_SETTINGS')
+  const SET_MY_COMMAND_DONATIONS=await translate(LanCode,'SET_MY_COMMAND_DONATIONS')
+  const SET_MY_COMMAND_IMAGINE=await translate(LanCode,'SET_MY_COMMAND_IMAGINE')
+  console.log('SET_MY_COMMAND_IMAGINE',SET_MY_COMMAND_IMAGINE);
+  bot.telegram.setMyCommands([
+    { command: 'start', description: SET_MY_COMMAND_START },
+    { command: 'settings', description: SET_MY_COMMAND_SETTINGS },
+    { command: 'imagine', description: SET_MY_COMMAND_IMAGINE },
+    { command: 'account', description: SET_MY_COMMAND_ACCOUNT },
+    { command: 'info', description: SET_MY_COMMAND_INFO },
+    { command: 'donations', description: SET_MY_COMMAND_DONATIONS },
+  ]);
+
+}
+
+
+
+bot.command('get', async (ctx) => {
   try {
     const users = await UserModel.find(); // Ищем всех пользователей
     const long=users.length
@@ -45,6 +76,23 @@ bot.command('getusers', async (ctx) => {
     console.error('Ошибка при поиске пользователей:', error);
   }
 });
+
+bot.command('messagebrodcast', async(ctx)=>{
+  Brodcast(ctx)
+} )
+
+
+bot.command('link', async (ctx) => {
+  const LanCode = ctx.message.from.language_code
+const descr='https://smmplanner.com/blog'
+  const linkButton = Markup.button.url(descr, 'https://smmplanner.com/blog/kakiie-voprosy-mozhno-zadat-chatgpt-i-kak-ikh-formulirovat/')
+  ctx.reply('Какие вопросы можно задать ChatGPT и как их формулировать', Markup.inlineKeyboard([[linkButton]]))
+});
+
+
+
+
+
 bot.command('start', initCommand)
 bot.command('account', accountCommand)
 bot.command('info', translateInfoCommand)
@@ -87,6 +135,20 @@ bot.command('imagine', StableDiffusion);
 
 
 
+bot.on('left_chat_member', async (ctx) => {
+  const userId = String(ctx.message.left_chat_member.id); // Обратите внимание, что вам нужно получить ID ушедшего пользователя из свойства left_chat_member
+  try {
+    // Попробуйте найти пользователя в базе данных и удалить его
+    const deletedUser = await UserModel.findOneAndRemove({ userId });
+    if (deletedUser) {
+      console.log(`Пользователь с ID ${userId} удален из базы данных.`);
+    } else {
+      console.log(`Пользователь с ID ${userId} не найден в базе данных.`);
+    }
+  } catch (error) {
+    console.error(`Ошибка при удалении пользователя: ${error.message}`);
+  }
+});
 
 // //!обработчик событий текста в чате(взаимодействие с CHAT GPT и googleCloud асистентом)
   bot.on(('text'), async (ctx) => {
@@ -101,5 +163,7 @@ bot.command('imagine', StableDiffusion);
 bot.on(message('voice'), voiceHandler)
 app.listen(PORT, () => console.log('server started on PORT ' + PORT))
 bot.launch();
+
+export {bot}
 process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))

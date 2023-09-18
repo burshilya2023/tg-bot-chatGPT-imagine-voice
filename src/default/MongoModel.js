@@ -45,6 +45,11 @@ const userSchema = new mongoose.Schema({
     type:String,
     default:'ru',
     require:false,
+  },
+  dayTextAnswer:{
+    type:Number,
+    default:0,
+    require:false
   }
 });
 

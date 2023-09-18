@@ -23,11 +23,11 @@ i18n.configure({
 export async function settingCommand(ctx){
   const LanCode=ctx.message.from.language_code
   i18n.setLocale(LanCode || 'en')
-  const result = i18n.__('settings.SETTINGS')
-  const on = i18n.__('settings.on')
-  const off = i18n.__('settings.off')
+  const settings_SETTINGS = i18n.__('settings_SETTINGS')
+  const on = i18n.__('settings_on')
+  const off = i18n.__('settings_off')
     try {
-        await ctx.reply(result, {
+        await ctx.reply(settings_SETTINGS, {
           reply_markup: {
             inline_keyboard: 
             [
